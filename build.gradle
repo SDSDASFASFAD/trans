@@ -1,0 +1,47 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '2.0.4'
+}
+apply plugin: 'scala'
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    maven {url 'http://maven.aliyun.com/nexus/content/groups/public/'}
+    maven {url 'https://repository.cloudera.com/artifactory/cloudera-repos/' }
+    maven {url 'http://repository.pentaho.org/content/groups/omni'}
+}
+dependencies {
+    compile fileTree(dir: 'lib', includes: ['*jar'])
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.10'
+    compile group: 'org.scala-lang', name: 'scala-library', version: '2.11.8'
+    compile group: 'org.apache.spark', name: 'spark-core_2.11', version: "2.4.0-cdh6.3.0"
+    compile group: 'org.apache.spark', name: 'spark-sql_2.11', version: "2.4.0-cdh6.3.0"
+    compile group: 'org.apache.spark', name: 'spark-hive_2.11', version: "2.4.0-cdh6.3.0"
+//    compile("com.google.guava:guava:23.0")
+    compile group: 'org.reflections', name: 'reflections', version: "0.9.12"
+    compile group: "ch.qos.logback", name: "logback-core", version: "1.2.3"
+    compile group: "ch.qos.logback", name: "logback-classic", version: "1.2.3"
+    annotationProcessor group: "org.projectlombok", name: "lombok", version: "1.18.22"
+    compile group: "org.projectlombok", name: "lombok", version: "1.18.22"
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: "3.8.1"
+    implementation group: 'org.apache.hive', name: 'hive-jdbc', version: '2.1.1-cdh6.3.0'
+    compile group: 'mysql',name:'mysql-connector-java',version:"5.1.40"
+    implementation 'cn.hutool:hutool-all:5.8.4'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+}
+
+
+test {
+    useJUnitPlatform()
+}
+shadowJar {
+//        baseName = 'flinkEngine'
+    relocate 'com.google', 'shade.com.google'
+    dependencies {
+    }
+    zip64 true
+}
