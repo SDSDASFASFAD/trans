@@ -68,7 +68,7 @@ object USLD2Bac {
           .content(line.getAs[String]("content"))
           .orderNum(line.getAs[String]("ordernum").toLong)
           .totalCost(line.getAs[String]("ordernum").toLong * 2)
-          .cwlCode(cwl_id)
+          .cwlId(cwl_id)
           .eltDate("")
           .machineId(line.getAs[String]("stationid"))
           .status("0")

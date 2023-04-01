@@ -10,12 +10,10 @@ import scala.collection.mutable
 object USLD2Bac {
   def main(args: Array[String]): Unit = {
 
-    val cwl_id=args(0)
-    //    val start_issue=args(1)
-    //    val end_issue=args(2)
-//    val ods_table=args(3)
-//    val d2_table=args(4)
-    val etl_date=args(1)
+    val etl_date=args(0)
+    val cwl_id=args(1)
+    val src_table = args(2)
+    val tar_table = args(3)
 
     val sparkSession: SparkSession = SparkSession.builder()
       .master("yarn")
@@ -28,7 +26,7 @@ object USLD2Bac {
 
     import sparkSession.implicits._
 
-    val dataFrame: DataFrame = sparkSession.sql(" select *  from test.fj_ods ")
+    val dataFrame: DataFrame = sparkSession.sql(s" select *  from $src_table  where etl_date = '$etl_date' and cwl_id = '$cwl_id' ")
 
     val sell_d2: Dataset[D2_SELL] = dataFrame.mapPartitions(part => {
 
@@ -47,8 +45,11 @@ object USLD2Bac {
           status = "1"
         }
 
-        //          if (1 == line.getAs[String]("cancel_flag").toInt || 2 == line.getAs[String]("cancel_flag").toInt || 4 == line.getAs[String]("cancel_flag").toInt ||)
+        var bet_number: String = line.getAs[String]("bet_number")
 
+        if(cwl_id.equals("90016") && line.getAs[String]("play_serial_number").equals("6") && bet_number.trim.substring(0,2).equals("20")){
+          bet_number = bet_number.replace("^", "$")
+        }
 
         val sell: Sell = com.ilotterytech.ocean.dp.D1D2.d2model.Sell.builder()
           .id("1")
@@ -61,15 +62,14 @@ object USLD2Bac {
           .cancelFlag(line.getAs[String]("cancel_flag"))
           .cancelTime(line.getAs[String]("cancel_time"))
           .operator(line.getAs[String]("operator_id"))
-          .content(line.getAs[String]("bet_number"))
-          //          .gameId()
+          .content(bet_number)
           .orderMethod(line.getAs[String]("bet_type").toInt)
           .printFlag(line.getAs[String]("print_flag"))
-          .content(line.getAs[String]("bet_number"))
           .orderNum(line.getAs[String]("bet_total").toLong)
           .totalCost(line.getAs[String]("bet_total").toLong * 2)
           .machineId(line.getAs[String]("agent_id"))
-          .cwlCode(cwl_id)
+          .province(35)
+          .cwlId(cwl_id)
           .status(status)
           .eltDate(etl_date)
           .build()
@@ -77,10 +77,15 @@ object USLD2Bac {
 
         val decoSell = sile.decodeSell(sell, factory, categoryFactory)
         val infos = decoSell.getBetInfos
+        // 玩法
         val palyTypeMap = new mutable.HashMap[String, String]()
+        // 投注号码
         val betNumberMap = new mutable.HashMap[String, String]()
+        // 倍数
         val timesMap = new mutable.HashMap[String, Int]()
+        // 注数
         val totalNumMap = new mutable.HashMap[String, Int]()
+        // 金额
         val totalCostMap = new mutable.HashMap[String, Int]()
         for (i <- 0 until infos.length) {
           palyTypeMap.put(i.toString, infos(i).getPlayType)
@@ -100,8 +105,10 @@ object USLD2Bac {
     sell_d2.toDF().createTempView("tmp")
 
 //    sparkSession.sql("select * from tmp ").show(50)
-    sparkSession.sql(s"insert overwrite table test.fj_d2 partition ( etl_date = '$etl_date' , cwl_id ,issue ) " +
+    sparkSession.sql(s"insert overwrite table $tar_table partition ( etl_date = '$etl_date' , cwl_id ,issue ) " +
                               s"select * from tmp"  )
+
+
   }
 
 }

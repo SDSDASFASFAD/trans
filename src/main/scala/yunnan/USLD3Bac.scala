@@ -47,7 +47,7 @@ object USLD3Bac {
 //         |""".stripMargin)
     val rawData = ses.sql(
       s"""
-         |SELECT * FROM  $d2_table  WHERE etl_date='$etl_date' AND (status = '0' or status='2')
+         |SELECT * FROM  $d2_table  WHERE etl_date='$etl_date' and cwl_id = '$cwl_id' AND (status = '0' or status='2')
          |""".stripMargin)
       val value: RDD[d3model.Sell] = rawData.rdd.mapPartitions(part => {
         val ga: Game = com.ilotterytech.ocean.dp.D2D3.GameFactory.getInstance().getGame(cwl_id)
@@ -143,7 +143,7 @@ object USLD3Bac {
       .content("")
       .orderNum(row.getAs[String]("order_num").toLong)
       .totalCost(row.getAs[String]("total_cost").toLong)
-      .cwlCode(cwl_id)
+      .cwlId(cwl_id)
       .eltDate("")
       //销售终端机（投注机）编号，（一般情况下站点只有一台机器，而彩票信息中给的站点编号为 8位数字 ，此种情况时 站点编号+01 = 机器编号）
       .machineId(row.getAs[String]("station_id"))

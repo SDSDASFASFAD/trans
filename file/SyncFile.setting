@@ -1,0 +1,15 @@
+[sftp]
+username = cz
+password = Bxzd@2023
+host = 112.115.105.187
+port = 53100
+
+[sync]
+source_dir = /lott_all/allticketdata
+target_dir =
+target_date = 2023-03-01
+
+
+
+
+
