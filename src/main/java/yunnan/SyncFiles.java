@@ -77,19 +77,20 @@ public class SyncFiles {
                             try {
                                 sftp.download(file, target_dir);
                             } catch (IOException e) {
-                                log.debug("download error");
+                                log.error("download error");
                                 e.printStackTrace();
                             }
 
                         }
                     } else {
-                        log.debug(source_dir + "下没有当前日期文件 ：" + target_date);
+//                        log.error(source_dir + "下没有当前日期文件 ：" + target_date);
+                        log.error("there are no files of the current date : " + target_date+ " in the source directory  :  " + source_dir);
                     }
 
 
                 }
             }else {
-                log.debug("no source_dir");
+                log.error( " source directory does not exist");
             }
 
             sftp.logout();

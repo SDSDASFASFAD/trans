@@ -56,14 +56,14 @@ public class SFTPUtil {
 
             session.setConfig(config);
             session.connect();
-            log.debug("SFTP CONNECTION SUCCESSFUL");
+            log.info("SFTP CONNECTION SUCCESSFUL");
 
             Channel channel = session.openChannel("sftp");
             channel.connect();
 
             sftp = (ChannelSftp) channel;
         } catch (JSchException e) {
-            log.debug("SFTP CONNECTION FAILED");
+            log.info("SFTP CONNECTION FAILED");
             e.printStackTrace();
         }
     }
@@ -101,7 +101,7 @@ public class SFTPUtil {
 
         sftp.cd(dir);
 //        System.out.println("进入目录"+dir);
-        log.debug("进入目录"+dir);
+        log.info(" cd : "+dir);
 
         Vector<String> file_list = sftp.ls("*");
 
@@ -113,7 +113,7 @@ public class SFTPUtil {
             target_date = date.trim();
         }
 
-        log.debug("目标日期为："+ target_date);
+        log.info(" target Date ："+ target_date);
 
 //        log.debug("获取 "+dir+" 下日期为 "+target_date+ "的数据");
 
@@ -145,7 +145,7 @@ public class SFTPUtil {
 //                log.debug(file_date);
 
             } catch (ParseException e) {
-                log.info("PARSE CST ERROR");
+                log.error("PARSE CST ERROR");
                 e.printStackTrace();
             }
 
@@ -153,7 +153,7 @@ public class SFTPUtil {
 
             if (file_date.equals(target_date)){
                 files.add(file);
-                log.debug("加入文件"+ file.getName());
+                log.info("add file : "+ file.getName());
             }
 
 
@@ -169,11 +169,11 @@ public class SFTPUtil {
 //        log.debug("start download");
             FileOutputStream out = new FileOutputStream(target_file);
             IOUtils.copy(is,out);
-            log.debug("download successed" + file.getAbsolutePath() +"  to :"+ savedir );
+            log.info("download successed :  " + file.getAbsolutePath() +"  to :"+ savedir );
             is.close();
             out.close();
         }else {
-            log.debug("target_dir is blank or saved_file is not file");
+            log.error("target_dir is blank or saved_file is not file");
         }
 
     }
