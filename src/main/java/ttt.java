@@ -9,7 +9,9 @@ public class ttt {
     public static void main(String[] args) {
 
 //        Db db = DbUtil.use(new SimpleDataSource("jdbc:mysql://192.168.110.2:3306/cwlcore", "cwl", "cwl1234"));
-        Db db = DbUtil.use(new SimpleDataSource("jdbc:mysql://localhost:3306/cwldataware?useSSL=false", "root", "root"));
+//        Db db = DbUtil.use(new SimpleDataSource("jdbc:mysql://localhost:3306/cwldataware?useSSL=false", "root", "root"));
 
+        String s = "20$快乐8-选10复试".split("-")[1];
+        System.out.println(s.substring(0,s.length()-2));
     }
 }

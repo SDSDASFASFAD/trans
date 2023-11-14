@@ -49,7 +49,7 @@ object USLD2Bac {
 
         var sell_time = "" ;
         if (ods_table.equals("ticket.sales_1")){
-             sell_time= DateUtil.format(DateUtil.parseDateTime(line.getAs[String]("sales_time")),"yyyy-MM-dd HH:mm:ss")
+             sell_time= DateUtil.format(DateUtil.parseDateTime(line.getAs[String]("sales_time")),"yyyy/MM/dd HH:mm:ss")
         }else{
           sell_time = line.getAs[String]("sales_time")
         }

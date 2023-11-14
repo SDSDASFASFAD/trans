@@ -1,11 +1,13 @@
 package beijing
 
 import java.time.LocalDate
-
 import com.ilotterytech.ocean.dp.D1D2.beans.LotteryConsume
+import com.ilotterytech.ocean.dp.D1D2.gtech.bj.GTechGameFactoryFactory
+import com.ilotterytech.ocean.dp.D1D2.sile.SiLeGameFactoryFactory
 import com.ilotterytech.ocean.dp.D1D2.suicai.SuicaiGameFactoryFactory
 import com.ilotterytech.ocean.dp.D1D2.suicai.utils.ScTickerUtils
 import org.apache.commons.codec.digest.DigestUtils
+import org.apache.commons.lang.StringUtils
 import org.apache.spark.sql.{Dataset, Row, SparkSession}
 
 import scala.collection.mutable
@@ -21,7 +23,7 @@ object NewBjD1toD2 {
     val ses = SparkSession
       .builder()
       .appName("")
-      .master("yarn")
+      .master("local")
       .enableHiveSupport()
       .getOrCreate()
     import ses.implicits._
@@ -44,13 +46,15 @@ object NewBjD1toD2 {
     }
     val selldata = ses.sql(
       s"""
-         |SELECT DISTINCT * FROM $table WHERE traprod='$traprod'   and dt>='$start' and dt<='$end'
+         |SELECT DISTINCT * FROM $table WHERE traprod='22' and substring(tratime,0,10)<'2020-01-01'
          |""".stripMargin)
 
     val d2_data: Dataset[D2_SELL] = selldata.mapPartitions(partition => {
-      val gameFactory = SuicaiGameFactoryFactory.getInstance().getFactory(cwl_id)
+      val gameFactory = GTechGameFactoryFactory.getInstance().getFactory("kl8")
       val factory = gameFactory.getCategoryFactory()
       partition.flatMap(row => {
+
+//        println(row)
 
         val palyTypeMap = new mutable.HashMap[String, String]()
         val betNumberMap = new mutable.HashMap[String, String]()
@@ -100,14 +104,17 @@ object NewBjD1toD2 {
         } else {
           dsells = D1toD2(row, palyTypeMap, betNumberMap, timesMap, totalNumMap, totalCostMap)
         }
+
+
+
         dsells
       })
     })
-    d2_data.toDF().createTempView("tmp")
+    d2_data.coalesce(2).toDF().createTempView("tmp")
     val dt = LocalDate.now().toString
     ses.sql(
       s"""
-         |INSERT OVERWRITE TABLE bjd1d2d3.d2_sell PARTITION(dt='$dt',cwl_id='$cwl_id') select * from tmp
+         |INSERT OVERWRITE TABLE bj_old_new.d2_sell PARTITION(dt='$dt',cwl_id='K880',issue) select * from tmp
          |""".stripMargin)
   }
 
@@ -145,14 +152,28 @@ object NewBjD1toD2 {
 
     Array(D2_SELL(id, serial,
       game_id, station_id,
-      sell_issue, valid_issue.toString,
-      station_order, order_datetime,
-      order_method, order_num,
-      total_cost, machine_id,
-      status.toString, cancel_time, cancel_flag.toString,
-      print_flag, operator, shop_serial,
-      issue_serial
-      , draw_time, palyTypeMap, betNumberMap, timesMap, totalNumMap, totalCostMap))
+      sell_issue,
+      valid_issue,
+      station_order,
+      order_datetime,
+      order_method,
+      order_num,
+      total_cost,
+      machine_id,
+      status.toString,
+      cancel_time,
+      cancel_flag.toString,
+      print_flag,
+      operator,
+      shop_serial,
+      issue_serial,
+      draw_time,
+      palyTypeMap,
+      betNumberMap,
+      timesMap,
+      totalNumMap,
+      totalCostMap,
+      valid_issue.toString))
   }
 
   def D1toD2_S3(row:Row,
@@ -200,15 +221,30 @@ object NewBjD1toD2 {
       val order_num = total_cost.toInt / 2
 
       val dsell: D2_SELL = D2_SELL(id, serial,
-        game_id, station_id,
-        sell_issue, valid_issue.toString,
-        station_order, order_datetime,
-        order_method, order_num,
-        total_cost, machine_id,
-        status.toString, cancel_time, cancel_flag.toString,
-        print_flag, operator, shop_serial,
-        issue_serial
-        , draw_time, palyTypeMap, betNumberMap, timesMap, totalNumMap, totalCostMap)
+        game_id,
+        station_id,
+        sell_issue,
+        valid_issue.toString,
+        station_order,
+        order_datetime,
+        order_method,
+        order_num,
+        total_cost,
+        machine_id,
+        status.toString,
+        cancel_time,
+        cancel_flag.toString,
+        print_flag,
+        operator,
+        shop_serial,
+        issue_serial,
+        draw_time,
+        palyTypeMap,
+        betNumberMap,
+        timesMap,
+        totalNumMap,
+        totalCostMap,
+        valid_issue.toString)
 
       res(i)=dsell
     }
@@ -239,6 +275,7 @@ object NewBjD1toD2 {
                       bet_number_map:mutable.Map[String,String],
                       times_map:mutable.Map[String,Int],
                       total_num_map:mutable.Map[String,Int],
-                      total_cost_map:mutable.Map[String,Int]
+                      total_cost_map:mutable.Map[String,Int],
+                      issue:String
                     )
 }

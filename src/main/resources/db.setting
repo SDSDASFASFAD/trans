@@ -1,0 +1,20 @@
+## db.setting文件
+
+## 可选配置
+# 是否在日志中显示执行的SQL
+showSql = true
+# 是否格式化显示的SQL
+formatSql = false
+# 是否显示SQL参数
+showParams = true
+# 打印SQL的日志等级，默认debug，可以是info、warn、error
+sqlLevel = debug
+
+
+url = jdbc:mysql://192.168.110.2:3306/szfcjh?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai
+username = szfc
+password = szfc1234
+driver = com.mysql.jdbc.Driver
+
+
+

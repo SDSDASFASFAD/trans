@@ -5,6 +5,7 @@ import com.ilotterytech.ocean.dp.D1D2.sile.SiLeGameFactoryFactory
 import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
 import yunnan.USLD2Bac.D2_SELL
 
+import java.lang.{Exception, NullPointerException}
 import scala.collection.mutable
 
 object USLD2Bac {
@@ -87,13 +88,20 @@ object USLD2Bac {
         val totalNumMap = new mutable.HashMap[String, Int]()
         // 金额
         val totalCostMap = new mutable.HashMap[String, Int]()
-        for (i <- 0 until infos.length) {
-          palyTypeMap.put(i.toString, infos(i).getPlayType)
-          betNumberMap.put(i.toString, infos(i).getBetNumber)
-          timesMap.put(i.toString, infos(i).getTimes)
-          totalNumMap.put(i.toString, infos(i).getTotalNum)
-          totalCostMap.put(i.toString, infos(i).getTotalCost)
-        }
+
+
+          for (i <- 0 until infos.length) {
+            try {
+            palyTypeMap.put(i.toString, infos(i).getPlayType)
+            }catch {
+              case e:NullPointerException => throw  new NullPointerException("NullPointerException : ticket data :"+ line.mkString )
+            }
+            betNumberMap.put(i.toString, infos(i).getBetNumber)
+            timesMap.put(i.toString, infos(i).getTimes)
+            totalNumMap.put(i.toString, infos(i).getTotalNum)
+            totalCostMap.put(i.toString, infos(i).getTotalCost)
+          }
+
         D2_SELL(sell.getId, sell.getSerial, sell.getProvince.toString, sell.getStationId, sell.getSellIssue, sell.getValidIssue, sell.getStationOrder,
           sell.getOrderDatetime, sell.getOrderMethod, sell.getOrderNum, sell.getTotalCost, sell.getMachineId, sell.getStatus, sell.getCancelTime,
           sell.getCancelFlag, sell.getPrintFlag, sell.getOperator, sell.getShop_serial, sell.getIssue_serial, sell.getDrawTime,
